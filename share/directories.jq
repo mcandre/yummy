@@ -4,6 +4,7 @@
 "# vim:syntax=make\n",
 "Assets := " + .assets,
 "Data := " + .data,
+"Macros := " + .macros,
 "Destination := " + .destination,
 "Documents := " + .documents,
 "Layouts := " + .layouts,

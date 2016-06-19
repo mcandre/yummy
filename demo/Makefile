@@ -118,12 +118,13 @@ Meta := .yummy
 -include $(Meta)/dirs.make
 
 # Defined?
-#	Destination
-#	Documents
 #	Assets
 #	Data
-#	Snippets
+#	Destination
+#	Documents
 #	Layouts
+#	Macros
+#	Snippets
 
 # Shared scripts used for M4, jq, etc.
 Share := /usr/local/share/yummy
@@ -131,7 +132,7 @@ Share := /usr/local/share/yummy
 # YummY version
 Version := $(shell cat $(Share)/version.txt)
 
-# M4 configuration and defined y4 macros
+# M4 configuration
 Y4 := $(Share)/yummy.m4
 
 # Accumulate files to clean and clobber targets
@@ -392,13 +393,14 @@ ifdef Destination # and Documents, etc.
 #=======================================================================
 
 _page = $(Layouts)/page.html $(Meta)/pages/%.yaml $(Meta)/site.yaml
+_macros := $(wildcard $(Macros)/*.m4)
 
-$(Destination)/%.html: $(Documents)/%.md $(_page) | $$(dir $$@)
+$(Destination)/%.html: $(Documents)/%.md $(_page) $(_macros) | $$(dir $$@)
 	$(_trace)
 	m4 --prefix-builtins				\
 	   --include=$(Snippets)			\
 	   --define=@BASE@=$(call _base,$<)		\
-	   $(Y4) $<					\
+	   $(Y4) $(_macros) $<				\
 	| $(_uncomment)					\
 	| $(_yaml_remove)				\
 	| pandoc --smart				\

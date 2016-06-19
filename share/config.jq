@@ -3,11 +3,12 @@
 
 . + { 
     destination: (.destination // "./_site"),
-    documents:   (.documents // "./documents"),
     assets:      (.assets // "./assets"),
     data:        (.data // "./data"),
-    snippets:    (.snippets // "./snippets"),
+    documents:   (.documents // "./documents"),
     layouts:     (.layouts // "./layouts"),
+    macros:      (.macros // "./macros"),
+    snippets:    (.snippets // "./snippets"),
     style:       (.style // "./style")
 }
 

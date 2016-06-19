@@ -4,11 +4,12 @@
 destination:   ./_site
 
 # Sources
-#documents:     ./documents
 #assets:        ./assets
 #data:          ./data
-#snippets:      ./snippets
+#documents:     ./documents
 #layouts:       ./layouts
+#macros:        ./macros
+#snippets:      ./snippets
 
 baseurl:  http://fadado.github.io/yummy/
 
