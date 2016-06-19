@@ -243,11 +243,11 @@ $(Meta)/dirs.make: $(Meta)/config.json
 	   --from-file $(Share)/directories.jq	\
 	$< > $@
 
-ifdef PagesJSON # and Documents, NodesJSON
-
 #=======================================================================
 # JSON for each page
 #=======================================================================
+
+ifdef PagesJSON # and Documents, NodesJSON
 
 define _base
 $(patsubst ../../%,%,$(subst $(_space),,$(patsubst %,../,$(subst /, ,$1))))
@@ -274,22 +274,6 @@ $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 	     --from-file $(Share)/merge.jq				\
 	> $@
 
-# "pages:" top level object
-$(Meta)/pages.json: $(PagesJSON)
-	$(_trace)
-	jq --sort-keys		\
-	   --slurp		\
-	   '{pages: .}'		\
-	   $^ > $@
-
-# "site:" top level object
-$(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
-	$(_trace)
-	jq --sort-keys				\
-	   --slurpfile p $(Meta)/pages.json	\
-	   '{site: (. + {version: "$(Version)"} + {sections: [$$p[0].pages[].section] | unique})}' \
-	$< > $@
-
 #=======================================================================
 # JSON for each node
 #=======================================================================
@@ -307,6 +291,26 @@ $(NodesJSON): $(Meta)/config.json | $$(dir $$@)
 	     --slurpfile config $(Meta)/config.json			\
 	     --from-file $(Share)/merge.jq				\
 	> $@
+
+#=======================================================================
+# JSON grouped
+#=======================================================================
+
+# "pages:" top level object
+$(Meta)/pages.json: $(PagesJSON)
+	$(_trace)
+	jq --sort-keys		\
+	   --slurp		\
+	   '{pages: .}'		\
+	   $^ > $@
+
+# "site:" top level object
+$(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
+	$(_trace)
+	jq --sort-keys				\
+	   --slurpfile p $(Meta)/pages.json	\
+	   '{site: (. + {version: "$(Version)"} + {sections: [$$p[0].pages[].section] | unique})}' \
+	$< > $@
 
 #=======================================================================
 # Derived YAML
