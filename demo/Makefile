@@ -294,7 +294,6 @@ $(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
 # JSON for each node
 #=======================================================================
 
-# TODO...
 $(NodesJSON): $(Meta)/config.json | $$(dir $$@)
 	{ echo '{';							\
 	  echo '"id": "$(patsubst $(Meta)/nodes/%,%,$(basename $@))/",';\
@@ -388,12 +387,14 @@ endif  # Layouts
 
 ifdef Destination # and Documents, etc.
 
+_macros := $(wildcard $(Macros)/*.m4)
+_data := $(wildcard $(Data)/*.yaml)
+
 #=======================================================================
 # Single page
 #=======================================================================
 
 _page = $(Layouts)/page.html $(Meta)/pages/%.yaml $(Meta)/site.yaml
-_macros := $(wildcard $(Macros)/*.m4)
 
 $(Destination)/%.html: $(Documents)/%.md $(_page) $(_macros) | $$(dir $$@)
 	$(_trace)
@@ -401,8 +402,8 @@ $(Destination)/%.html: $(Documents)/%.md $(_page) $(_macros) | $$(dir $$@)
 	   --include=$(Snippets)			\
 	   --define=@BASE@=$(call _base,$<)		\
 	   $(Y4) $(_macros) $<				\
-	| $(_uncomment)					\
 	| $(_yaml_remove)				\
+	| $(_uncomment)					\
 	| pandoc --smart				\
 		 --standalone				\
 		 --table-of-contents			\
@@ -411,6 +412,7 @@ $(Destination)/%.html: $(Documents)/%.md $(_page) $(_macros) | $$(dir $$@)
 		 --template=$(Layouts)/page.html	\
 		 $(Meta)/pages/$*.yaml			\
 		 $(Meta)/site.yaml			\
+		 $(_data)				\
 		 -					\
 	> $@						\
 	&& $(call _validate,$@)
@@ -429,6 +431,7 @@ $(NodesHTML): $(Destination)/%/index.html : $(_node) | $$(dir $$@)
 		--template=$(Layouts)/section.html	\
 		$(Meta)/nodes/$*.yaml			\
 		$(Meta)/site.yaml			\
+		$(_data)				\
 	> $@						\
 	&& $(call _validate,$@)
 
@@ -446,6 +449,7 @@ $(Destination)/index.html: $(_home) | $$(dir $$@)
 		--template=$(Layouts)/home.html		\
 		$(Meta)/site.yaml			\
 		$(Meta)/pages.yaml			\
+		$(_data)				\
 	> $@						\
 	&& $(call _validate,$@)
 
