@@ -1,0 +1,32 @@
+# YummY site directories
+
+# Site destination
+destination:   ./_site
+
+# Sources
+#documents:     ./documents
+#assets:        ./assets
+#data:          ./data
+#snippets:      ./snippets
+#layouts:       ./layouts
+
+baseurl:  http://fadado.github.io/yummy/
+
+title: Yummy Universe of MarkDown Mixed with YAML
+subtitle: A static site generator based on `pandoc`, `m4`, `jq`, `make`, `bash`...
+author: &author Joan Josep Ordinas Rosa
+lang: &lang en
+
+# Default values
+defaults:
+  - idprefix: "" # all files
+    properties:
+      title-prefix: YummY
+      author: *author
+      lang: *lang
+  - idprefix: "targets/"
+    properties:
+  - idprefix: "scripts/"
+    properties:
+
+# vim:ts=2:sw=2:et:ai:fileencoding=utf8:syntax=yaml
