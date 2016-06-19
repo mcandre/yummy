@@ -11,7 +11,6 @@ m4_include(head.p)
 m4_divert(1)m4_dnl
 
 m4_include(title.p)
-m4_include(toc.p)
 
 <!--
 <<< BODY CONTENT EXPANDED HERE >>>

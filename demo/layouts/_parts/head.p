@@ -1,7 +1,7 @@
 <!--
   Favorite icon
 -->
-<link rel="icon" type="image/vnd.microsoft.icon" href="$page.base$favicon.ico"/>
+<link rel="icon" type="image/vnd.microsoft.icon" href="$self.base$favicon.ico"/>
 
 <!--
   CSS

@@ -321,12 +321,11 @@ endef
 .PRECIOUS: $(Meta)/pages/%.yaml
 .PRECIOUS: $(Meta)/nodes/%.yaml
 
-$(Meta)/pages/%.yaml: $(Meta)/pages/%.json ; $(call _object,page)
-$(Meta)/nodes/%.yaml: $(Meta)/nodes/%.json ; $(call _object,node)
+# Same top level object name: 'self'
+$(Meta)/pages/%.yaml: $(Meta)/pages/%.json ; $(call _object,self)
+$(Meta)/nodes/%.yaml: $(Meta)/nodes/%.json ; $(call _object,self)
 
-METADATA := $(Meta)/site.yaml $(Meta)/pages.yaml
-
-$(METADATA): %.yaml : %.json
+$(Meta)/site.yaml $(Meta)/pages.yaml: %.yaml : %.json
 	$(_trace)
 	json2yaml $< > $@
 
@@ -338,28 +337,47 @@ endif # PagesJSON
 
 ifdef Layouts # and Y4, _uncomment
 
-define _matryoshka :=
-  $(foreach p,page outer,$(Layouts)/$p.p)		\
-  $(foreach p,head title toc,$(Layouts)/_parts/$p.p)
-endef
-
-$(Layouts)/page.html: $(_matryoshka) $(Y4)
+$(Layouts)/page.html:				\
+		$(Layouts)/page.p		\
+		$(Layouts)/outer.p		\
+		$(Layouts)/_parts/head.p	\
+		$(Layouts)/_parts/title.p	\
+		$(Layouts)/_parts/toc.p		\
+		$(Y4)
 	$(_trace)
-	m4 --prefix-builtins				\
-	   --include=$(Layouts)/_parts			\
-	   $(Y4) $(Layouts)/page.p $(Layouts)/outer.p	\
-	| $(_uncomment) -e '/^$$/d'			\
+	m4 --prefix-builtins			\
+	   --include=$(Layouts)/_parts		\
+	   $(Y4) $(Layouts)/{page,outer}.p	\
+	| $(_uncomment) -e '/^$$/d'		\
+	> $@
+
+$(Layouts)/section.html:			\
+		$(Layouts)/section.p		\
+		$(Layouts)/outer.p		\
+		$(Layouts)/_parts/head.p	\
+		$(Layouts)/_parts/title.p	\
+		$(Y4)
+	$(_trace)
+	m4 --prefix-builtins			\
+	   --include=$(Layouts)/_parts		\
+	   $(Y4) $(Layouts)/{section,outer}.p	\
+	| $(_uncomment) -e '/^$$/d'		\
+	> $@
+
+$(Layouts)/home.html:				\
+		$(Layouts)/home.p		\
+		$(Layouts)/outer.p		\
+		$(Layouts)/_parts/head.p	\
+		$(Layouts)/_parts/title.p	\
+		$(Y4)
+	$(_trace)
+	m4 --prefix-builtins			\
+	   --include=$(Layouts)/_parts		\
+	   $(Y4) $(Layouts)/{home,outer}.p	\
+	| $(_uncomment) -e '/^$$/d'		\
 	> $@
 
 clobber += $(Layouts)/*.html
-
-# TODO...
-$(Layouts)/section.html: $(Layouts)/page.html
-	cp $< $@
-
-# TODO...
-$(Layouts)/index.html: $(Layouts)/page.html
-	cp $< $@
 
 endif  # Layouts
 
@@ -373,7 +391,7 @@ ifdef Destination # and Documents, etc.
 # Single page
 #=======================================================================
 
-_page = $(Meta)/pages/%.yaml $(Layouts)/page.html $(METADATA) 
+_page = $(Layouts)/page.html $(Meta)/pages/%.yaml $(Meta)/site.yaml
 
 $(Destination)/%.html: $(Documents)/%.md $(_page) | $$(dir $$@)
 	$(_trace)
@@ -390,7 +408,7 @@ $(Destination)/%.html: $(Documents)/%.md $(_page) | $$(dir $$@)
 		 --to=html				\
 		 --template=$(Layouts)/page.html	\
 		 $(Meta)/pages/$*.yaml			\
-		 $(METADATA)				\
+		 $(Meta)/site.yaml			\
 		 -					\
 	> $@						\
 	&& $(call _validate,$@)
@@ -399,23 +417,35 @@ $(Destination)/%.html: $(Documents)/%.md $(_page) | $$(dir $$@)
 # Section listing
 #=======================================================================
 
-_node = $(Meta)/nodes/%.json $(Layouts)/section.html $(METADATA) 
+_node = $(Layouts)/section.html $(Meta)/nodes/%.yaml $(Meta)/site.yaml
 
-# TODO...
 $(NodesHTML): $(Destination)/%/index.html : $(_node) | $$(dir $$@)
 	$(_trace)
-	touch $@
+	pandoc  --standalone				\
+		--from=markdown-pandoc_title_block	\
+		--to=html				\
+		--template=$(Layouts)/section.html	\
+		$(Meta)/nodes/$*.yaml			\
+		$(Meta)/site.yaml			\
+	> $@						\
+	&& $(call _validate,$@)
 
 #=======================================================================
 # Home page
 #=======================================================================
 
-_home = $(Layouts)/index.html $(METADATA) 
+_home = $(Layouts)/home.html $(Meta)/site.yaml $(Meta)/pages.yaml
 
-# TODO...
 $(Destination)/index.html: $(_home) | $$(dir $$@)
 	$(_trace)
-	touch $@
+	pandoc  --standalone				\
+		--from=markdown-pandoc_title_block	\
+		--to=html				\
+		--template=$(Layouts)/home.html		\
+		$(Meta)/site.yaml			\
+		$(Meta)/pages.yaml			\
+	> $@						\
+	&& $(call _validate,$@)
 
 endif # Destination
 
@@ -504,7 +534,14 @@ clobber:
 
 build: clean all
 
-setup: $(METADATA) $(NodesYAML) $(PagesYAML) $(Layouts)/page.html
+SETUP := \
+	$(Layouts)/page.html	\
+	$(Meta)/pages.yaml	\
+	$(Meta)/site.yaml	\
+	$(NodesYAML)		\
+	$(PagesYAML)		\
+
+setup: $(SETUP)
 	@:
 
 # Edit all documents
