@@ -4,9 +4,9 @@
 
 # Usage: site config.json pages.json version  > site.json
 
-CONFIG=$1
-PAGES=$2
-VERSION=$3
+VERSION=$1
+CONFIG=$2
+PAGES=$3
 
 jq  --sort-keys				\
     --from-file ${0}.jq     \

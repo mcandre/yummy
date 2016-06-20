@@ -1,0 +1,15 @@
+#!/bin/bash
+
+#
+
+# Usage
+
+CONFIG=$1
+
+yaml2json $CONFIG       \
+| jq --sort-keys		\
+     --from-file ${0}.jq
+
+exit
+
+# vim:ts=4:sw=4:ai:et:syntax=sh

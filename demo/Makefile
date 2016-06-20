@@ -217,11 +217,7 @@ ifeq (config.yaml, $(wildcard config.yaml))
     # conversion of config.yaml to $(Meta)/config.json
 $(Meta)/config.json: config.yaml | $(Meta)
 	$(_trace)
-	yaml2json $<				\
-	| jq --sort-keys			\
-	     --from-file $(Share)/config.jq	\
-	- > $@
-
+	_meta/config $^ > $@
 else
 # ...or config.json...
 ifeq (config.json, $(wildcard config.json))
@@ -307,14 +303,11 @@ $(Meta)/pages.json: $(PagesJSON)	# _meta/pages
 # "site:" top level object
 $(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
 	$(_trace)
-	_meta/site $< $(Meta)/pages.json $(Version) > $@
+	_meta/site $(Version) $^ > $@
 
 #=======================================================================
 # Derived YAML
 #=======================================================================
-
-#.PRECIOUS: $(Meta)/pages/%.yaml
-#.PRECIOUS: $(Meta)/nodes/%.yaml
 
 # Pages and nodes have same top level object name: 'self'
 define _self
