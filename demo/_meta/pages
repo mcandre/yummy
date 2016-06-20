@@ -4,9 +4,9 @@
 
 # Usage: pages {page.json...}  > pages.json
 
-jq  --sort-keys     \
-    --slurp         \
-    '{ pages: . }'  \
+jq  --sort-keys         \
+    --slurp             \
+    --from-file ${0}.jq \
     "$@"
 
 exit
