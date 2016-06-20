@@ -145,7 +145,7 @@ clobber = *.bak
 
 ifdef Destination # and Documents
 
-clobber += $(Destination)
+clobber += $(Destination) # delete all output
 
 # Input documents extensions
 _md :=	-name '*.markdown' -o	\
@@ -206,14 +206,15 @@ endif  # Destination
 $(Meta):
 	$(call _mkdir,$@)
 
-clobber += $(Meta)
+clobber += $(Meta) # delete all metadata
 
 #=======================================================================
 # Config
 #=======================================================================
 
+# Use config.yaml...
 ifeq (config.yaml, $(wildcard config.yaml))
-# Pure conversion of config.yaml to $(Meta)/config.json
+    # conversion of config.yaml to $(Meta)/config.json
 $(Meta)/config.json: config.yaml | $(Meta)
 	$(_trace)
 	yaml2json $<				\
@@ -222,12 +223,14 @@ $(Meta)/config.json: config.yaml | $(Meta)
 	- > $@
 
 else
+# ...or config.json...
 ifeq (config.json, $(wildcard config.json))
-# SImply copy (formated) config.json to $(Meta)/config.json
+    # copy (formated) of config.json to $(Meta)/config.json
 $(Meta)/config.json: config.json | $(Meta)
 	$(_trace)
 	jq --sort-keys '.' $< > $@
 else
+# ...or die!
 $(error Configuration file not found)
 endif
 endif
@@ -310,20 +313,20 @@ $(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
 # Derived YAML
 #=======================================================================
 
-define _object
+#.PRECIOUS: $(Meta)/pages/%.yaml
+#.PRECIOUS: $(Meta)/nodes/%.yaml
+
+# Pages and nodes have same top level object name: 'self'
+define _self
   $(_trace)
-  { echo '{"$1":'; cat $<; echo "}"; }	\
-  | json2yaml > $@
+  jq '{self: .}' $< | json2yaml > $@
 endef
 
-.PRECIOUS: $(Meta)/pages/%.yaml
-.PRECIOUS: $(Meta)/nodes/%.yaml
+$(Meta)/pages/%.yaml: $(Meta)/pages/%.json ; $(_self)
+$(Meta)/nodes/%.yaml: $(Meta)/nodes/%.json ; $(_self)
 
-# Same top level object name: 'self'
-$(Meta)/pages/%.yaml: $(Meta)/pages/%.json ; $(call _object,self)
-$(Meta)/nodes/%.yaml: $(Meta)/nodes/%.json ; $(call _object,self)
-
-$(Meta)/site.yaml $(Meta)/pages.yaml: %.yaml : %.json
+# $(Meta)/site.yaml $(Meta)/pages.yaml: %.yaml : %.json
+%.yaml: %.json
 	$(_trace)
 	json2yaml $< > $@
 
@@ -375,7 +378,7 @@ $(Layouts)/home.html:				\
 	| $(_uncomment) -e '/^$$/d'		\
 	> $@
 
-clobber += $(Layouts)/*.html
+clobber += $(Layouts)/*.html # delete generated layouts
 
 endif  # Layouts
 
@@ -479,7 +482,7 @@ $(Destination)/sitemap.xml.gz: $(Destination)/sitemap.xml
 	$(_trace)
 	gzip --stdout $< > $@
 
-clean += $(Destination)/sitemap.*
+clean += $(Destination)/sitemap.* # delete all sitemap formats
 
 #=======================================================================
 # New page and document
