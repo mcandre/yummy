@@ -208,6 +208,8 @@ $(Meta):
 
 clobber += $(Meta) # delete all metadata
 
+# TODO: move _meta to /usr/local/share/yummy/meta
+
 #=======================================================================
 # Config
 #=======================================================================
@@ -215,9 +217,9 @@ clobber += $(Meta) # delete all metadata
 # Use config.yaml...
 ifeq (config.yaml, $(wildcard config.yaml))
     # conversion of config.yaml to $(Meta)/config.json
-$(Meta)/config.json: config.yaml | $(Meta)
+$(Meta)/config.json: config.yaml _meta/config _meta/config.jq | $(Meta)
 	$(_trace)
-	_meta/config $^ > $@
+	_meta/config $< > $@
 else
 # ...or config.json...
 ifeq (config.json, $(wildcard config.json))
@@ -277,18 +279,12 @@ $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 # JSON for each node
 #=======================================================================
 
-$(NodesJSON): $(Meta)/config.json | $$(dir $$@)
-	{ echo '{';							\
-	  echo '"id": "$(patsubst $(Meta)/nodes/%,%,$(basename $@))/",';\
-	  echo '"isnode": true,';					\
-	  echo '"ispage": false,';					\
-	  echo '"ishome": false',;					\
-	  echo '"title": "$(notdir $(basename $@))",';			\
-	  echo '"date": "'$$(date --utc --iso-8601)'"';			\
-	  echo '}'; }							\
-	| jq --sort-keys						\
-	     --slurpfile config $(Meta)/config.json			\
-	     --from-file $(Share)/merge.jq				\
+$(NodesJSON): $(Meta)/config.json _meta/node _meta/node.jq | $$(dir $$@)
+	$(_trace)
+	_meta/node						\
+		$<						\
+		$(patsubst $(Meta)/nodes/%,%,$(basename $@))	\
+		$(notdir $(basename $@))			\
 	> $@
 
 #=======================================================================
@@ -296,14 +292,14 @@ $(NodesJSON): $(Meta)/config.json | $$(dir $$@)
 #=======================================================================
 
 # "pages:" top level object
-$(Meta)/pages.json: $(PagesJSON)	# _meta/pages
+$(Meta)/pages.json: $(PagesJSON) _meta/pages _meta/pages.jq
 	$(_trace)
-	_meta/pages $^ > $@
+	_meta/pages $(filter %.json,$^) > $@
 
 # "site:" top level object
-$(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
+$(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json _meta/site _meta/site.jq
 	$(_trace)
-	_meta/site $(Version) $^ > $@
+	_meta/site $(Version) $(Meta)/config.json $(Meta)/pages.json > $@
 
 #=======================================================================
 # Derived YAML

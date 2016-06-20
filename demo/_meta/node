@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#
+
+# Usage:
+
+CONFIG=$1
+ID=$2
+TITLE=$3
+
+jq  --null-input                            \
+    --sort-keys			                    \
+    --slurpfile config $CONFIG              \
+    --from-file ${0}.jq                     \
+    --arg id $ID                            \
+    --arg title $TITLE                      \
+    --arg date "$(date --utc --iso-8601)"
+
+exit
+
+# vim:ts=4:sw=4:ai:et:syntax=sh
