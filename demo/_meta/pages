@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# Concat all individual pages JSON as a list
+
+# Usage: pages {page.json...}  > pages.json
+
+jq  --sort-keys     \
+    --slurp         \
+    '{ pages: . }'  \
+    "$@"
+
+exit
+
+# TODO: use xargs or equivalent?
+
+# vim:ts=4:sw=4:ai:et:syntax=sh

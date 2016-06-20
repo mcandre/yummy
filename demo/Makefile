@@ -213,7 +213,7 @@ clobber += $(Meta)
 #=======================================================================
 
 ifeq (config.yaml, $(wildcard config.yaml))
-# Using config.yaml as a config file
+# Pure conversion of config.yaml to $(Meta)/config.json
 $(Meta)/config.json: config.yaml | $(Meta)
 	$(_trace)
 	yaml2json $<				\
@@ -223,7 +223,7 @@ $(Meta)/config.json: config.yaml | $(Meta)
 
 else
 ifeq (config.json, $(wildcard config.json))
-# Using config.json as a config file
+# SImply copy (formated) config.json to $(Meta)/config.json
 $(Meta)/config.json: config.json | $(Meta)
 	$(_trace)
 	jq --sort-keys '.' $< > $@
@@ -297,20 +297,14 @@ $(NodesJSON): $(Meta)/config.json | $$(dir $$@)
 #=======================================================================
 
 # "pages:" top level object
-$(Meta)/pages.json: $(PagesJSON)
+$(Meta)/pages.json: $(PagesJSON)	# _meta/pages
 	$(_trace)
-	jq --sort-keys		\
-	   --slurp		\
-	   '{pages: .}'		\
-	   $^ > $@
+	_meta/pages $^ > $@
 
 # "site:" top level object
 $(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json
 	$(_trace)
-	jq --sort-keys				\
-	   --slurpfile p $(Meta)/pages.json	\
-	   '{site: (. + {version: "$(Version)"} + {sections: [$$p[0].pages[].section] | unique})}' \
-	$< > $@
+	_meta/site $< $(Meta)/pages.json $(Version) > $@
 
 #=======================================================================
 # Derived YAML

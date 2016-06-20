@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# Create site.json
+
+# Usage: site config.json pages.json version  > site.json
+
+CONFIG=$1
+PAGES=$2
+VERSION=$3
+
+jq  --sort-keys				\
+    --from-file ${0}.jq     \
+    --slurpfile pages "$PAGES"	\
+    --arg version $VERSION  \
+    "$CONFIG"
+
+exit
+
+# vim:ts=4:sw=4:ai:et:syntax=sh
