@@ -281,11 +281,7 @@ $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 
 $(NodesJSON): $(Meta)/config.json _meta/node _meta/node.jq | $$(dir $$@)
 	$(_trace)
-	_meta/node						\
-		$<						\
-		$(patsubst $(Meta)/nodes/%,%,$(basename $@))	\
-		$(notdir $(basename $@))			\
-	> $@
+	_meta/node $< $@ $(Meta)/nodes/ > $@
 
 #=======================================================================
 # JSON grouped

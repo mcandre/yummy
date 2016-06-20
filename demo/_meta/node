@@ -5,8 +5,12 @@
 # Usage:
 
 CONFIG=$1
-ID=$2
-TITLE=$3
+TARGET=$2
+BASE=$3
+
+prefix=${TARGET%.json}
+TITLE=${prefix##*/}
+ID=${prefix#$BASE}
 
 jq  --null-input                            \
     --sort-keys			                    \
@@ -14,7 +18,7 @@ jq  --null-input                            \
     --from-file ${0}.jq                     \
     --arg id $ID                            \
     --arg title $TITLE                      \
-    --arg date "$(date --utc --iso-8601)"
+    --arg date $(date --utc --iso-8601)
 
 exit
 
