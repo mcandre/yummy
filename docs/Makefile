@@ -273,7 +273,9 @@ $(Meta)/nodes.json: $(NodesJSON) _meta/nodes _meta/nodes.jq
 	$(_trace)
 	_meta/nodes $(filter %.json,$^) > $@
 
-# TODO: concat all nodes?
+$(Meta)/sections.json: $(Meta)/pages.json _meta/sections _meta/sections.jq
+	$(_trace)
+	_meta/sections $< > $@
 
 #=======================================================================
 # Derived YAML
@@ -288,10 +290,18 @@ endef
 $(Meta)/pages/%.yaml: $(Meta)/pages/%.json ; $(_self)
 $(Meta)/nodes/%.yaml: $(Meta)/nodes/%.json ; $(_self)
 
-# $(Meta)/site.yaml $(Meta)/pages.yaml: %.yaml : %.json
 %.yaml: %.json
 	$(_trace)
 	json2yaml $< > $@
+
+# Metadata to use when calling pandoc
+METADATA := \
+	$(Meta)/nodes.yaml	\
+	$(Meta)/pages.yaml	\
+	$(Meta)/sections.yaml	\
+	$(Meta)/site.yaml	\
+	$(NodesYAML)		\
+	$(PagesYAML)		\
 
 endif # PagesJSON
 
@@ -343,6 +353,11 @@ $(Layouts)/home.html:				\
 
 clobber += $(Layouts)/*.html # delete generated layouts
 
+TEMPLATES := \
+	$(Layouts)/home.html	\
+	$(Layouts)/page.html	\
+	$(Layouts)/section.html	\
+
 endif  # Layouts
 
 ########################################################################
@@ -362,9 +377,9 @@ define _base
 $(patsubst ../../%,%,$(subst $(_space),,$(patsubst %,../,$(subst /, ,$1))))
 endef
 
-_page = $(Layouts)/page.html $(Meta)/pages/%.yaml $(Meta)/site.yaml
+_page = $(Layouts)/page.html $(Meta)/pages/%.yaml $(Meta)/site.yaml $(_data) $(_macros) 
 
-$(Destination)/%.html: $(Documents)/%.md $(_page) $(_macros) | $$(dir $$@)
+$(Destination)/%.html: $(Documents)/%.md $(_page) | $$(dir $$@)
 	$(_trace)
 	m4 --prefix-builtins				\
 	   --include=$(Snippets)			\
@@ -389,7 +404,16 @@ $(Destination)/%.html: $(Documents)/%.md $(_page) $(_macros) | $$(dir $$@)
 # Section listing
 #=======================================================================
 
-_node = $(Layouts)/section.html $(Meta)/nodes/%.yaml $(Meta)/site.yaml
+# All site metadata
+_site = \
+	$(Meta)/nodes.yaml	\
+	$(Meta)/pages.yaml	\
+	$(Meta)/sections.yaml	\
+	$(Meta)/site.yaml	\
+
+_extra = $(_data) $(_macros) 
+
+_node = $(Layouts)/section.html $(Meta)/nodes/%.yaml $(_site) $(_extra)
 
 $(NodesHTML): $(Destination)/%/index.html : $(_node) | $$(dir $$@)
 	$(_trace)
@@ -398,7 +422,7 @@ $(NodesHTML): $(Destination)/%/index.html : $(_node) | $$(dir $$@)
 		--to=html				\
 		--template=$(Layouts)/section.html	\
 		$(Meta)/nodes/$*.yaml			\
-		$(Meta)/site.yaml			\
+		$(_site)				\
 		$(_data)				\
 	> $@						\
 	&& $(call _validate,$@)
@@ -407,7 +431,7 @@ $(NodesHTML): $(Destination)/%/index.html : $(_node) | $$(dir $$@)
 # Home page
 #=======================================================================
 
-_home = $(Layouts)/home.html $(Meta)/site.yaml $(Meta)/pages.yaml
+_home = $(Layouts)/home.html $(_site) $(_extra)
 
 $(Destination)/index.html: $(_home) | $$(dir $$@)
 	$(_trace)
@@ -415,8 +439,7 @@ $(Destination)/index.html: $(_home) | $$(dir $$@)
 		--from=markdown-pandoc_title_block	\
 		--to=html				\
 		--template=$(Layouts)/home.html		\
-		$(Meta)/site.yaml			\
-		$(Meta)/pages.yaml			\
+		$(_site)				\
 		$(_data)				\
 	> $@						\
 	&& $(call _validate,$@)
@@ -497,7 +520,7 @@ endif # Destination
 # Utilities
 ########################################################################
 
-.PHONY: clean clobber build
+.PHONY: clean clobber build setup edit help
 
 clean:
 	rm --force --recursive $(clean)
@@ -507,23 +530,13 @@ clobber:
 
 build: clean all
 
-SETUP := \
-	$(Layouts)/page.html	\
-	$(Meta)/nodes.yaml	\
-	$(Meta)/pages.yaml	\
-	$(Meta)/site.yaml	\
-	$(NodesYAML)		\
-	$(PagesYAML)		\
-
-setup: $(SETUP)
-	@:
+setup: $(TEMPLATES) $(METADATA)
 
 # Edit all documents
 edit:
 	$(EDITOR) $$(find $(Documents) -name '*.md')
 
 # Show targets
-.PHONY: help
 help:
 	echo 'Targets:';					\
 	$(MAKE) --print-data-base --just-print 2>&1		\

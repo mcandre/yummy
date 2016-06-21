@@ -4,10 +4,9 @@
 
 # Concat all individual JSON nodes as a list
 
-# Usage: nodes {node.json...} > nodes
+# Usage: nodes {node.json...} > nodes.json
 
-jq  --sort-keys         \
-    --slurp             \
+jq  --slurp             \
     --from-file ${0}.jq \
     "$@"
 

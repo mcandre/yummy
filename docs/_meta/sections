@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# meta/sections
+
+# ...
+
+# Usage: sections pages.json > sections.json
+
+PAGES=${1?Expected pages.json}
+
+jq  --from-file ${0}.jq \
+    "$PAGES"
+
+exit
+
+# TODO: use xargs or equivalent?
+
+# vim:ts=4:sw=4:ai:et:syntax=sh

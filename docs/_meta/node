@@ -7,7 +7,7 @@
 # Usage: node config.json 'node.json' > 'node.json'
 
 CONFIG=${1?Expected config.json}
-TARGET=${1?Expected target pathname}
+TARGET=${2?Expected target pathname}
 
 prefix=${TARGET%.json}
 TITLE=${prefix##*/}

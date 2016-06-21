@@ -5,8 +5,7 @@
 . as $pages |
 
 {
-  pages: $pages,
-  sections: ([$pages[].section] | unique)
+  pages: $pages
 }
 
 

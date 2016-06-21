@@ -6,9 +6,9 @@
 
 # Usage: page config.json 'source' 'stem' 'target'
 
-CONFIG=$1
-SOURCE=$2
-TARGET=$3
+CONFIG=${1?Expected config.json}
+SOURCE=${2?Expected source filename}
+TARGET=${3?Expected target filename}
 
 front_matter='-'    # standard input
 lastmod=$(date --utc --iso-8601=seconds --reference=$SOURCE)

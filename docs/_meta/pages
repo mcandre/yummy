@@ -6,8 +6,7 @@
 
 # Usage: pages {page.json...} > pages.json
 
-jq  --sort-keys         \
-    --slurp             \
+jq  --slurp             \
     --from-file ${0}.jq \
     "$@"
 
