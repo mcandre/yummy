@@ -1,4 +1,6 @@
-# YummY website makefile
+#
+# YummY documentation makefile
+#
 
 ########################################################################
 # Prerequisites
@@ -38,7 +40,7 @@ MAKEFLAGS += --no-builtin-variables
 MAKEFLAGS += --warn-undefined-variables
 .SUFFIXES:
 
-# Shell and options
+# Shell and shell options
 SHELL := /bin/bash
 .SHELLFLAGS := -o errexit -o pipefail -o nounset -c
 
@@ -48,7 +50,7 @@ SHELL := /bin/bash
 # Enable a second expansion of the prerequisites
 .SECONDEXPANSION:
 
-# Make will not print the recipe used to remake files.
+# Make will not print the recipe used to make files.
 .SILENT:
 
 ########################################################################
@@ -82,7 +84,7 @@ endef
 
 # Remove (some) XML comments
 define _uncomment =
-  sed -e '/^<!--=*$$/,/^=*-->$$/d'
+  sed -e '/^<!--.*-->$$/d' -e '/^<!--=*$$/,/^=*-->$$/d'
 endef
 
 #=======================================================================
@@ -126,7 +128,7 @@ Meta := ./.yummy
 #	Macros
 #	Snippets
 
-# Shared scripts used for M4, jq, etc.
+# Shared data and scripts used for M4, jq, etc.
 Share := /usr/local/share/yummy
 
 # YummY version
