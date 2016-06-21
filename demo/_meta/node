@@ -1,24 +1,23 @@
 #!/bin/bash
 
-#
+# meta/node
 
-# Usage:
+# Merge 'node.json'from config.json
 
-CONFIG=$1
-TARGET=$2
-BASE=$3
+# Usage: node config.json 'node.json' > 'node.json'
+
+CONFIG=${1?Expected config.json}
+TARGET=${1?Expected target pathname}
 
 prefix=${TARGET%.json}
 TITLE=${prefix##*/}
-ID=${prefix#$BASE}
+ID=${prefix#*/nodes/}/index
 
-jq  --null-input                            \
-    --sort-keys			                    \
-    --slurpfile config $CONFIG              \
+jq  --sort-keys			                    \
     --from-file ${0}.jq                     \
     --arg id $ID                            \
-    --arg title $TITLE                      \
-    --arg date $(date --utc --iso-8601)
+    --arg title $TITLE
+    $CONFIG
 
 exit
 

@@ -1,14 +1,13 @@
-# Create site.json
-#   --arg: version
-#   --slurpfile: pages
+# meta/site.jq
 
-del(.defaults)                  as $config   |
-$pages[0].pages                 as $pages    |
-([$pages[].section] | unique)   as $sections |
+del(.defaults) as $config   |
 
-{ site: ($config 
-            + { version: $version, sections: $sections }
-        )
+{ site: (
+    $config 
+    + {
+        version: $version
+      }
+    )
 }
 
-# vim:ai:sw=4:ts=4:et:fileencoding=utf-8:syntax=jq
+# vim:ai:sw=2:ts=2:et:fileencoding=utf-8:syntax=jq

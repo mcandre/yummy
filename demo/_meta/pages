@@ -1,8 +1,10 @@
 #!/bin/bash
 
-# Concat all individual pages JSON as a list
+# meta/pages
 
-# Usage: pages {page.json...}  > pages.json
+# Concat all individual JSON pages as a list
+
+# Usage: pages {page.json...} > pages.json
 
 jq  --sort-keys         \
     --slurp             \

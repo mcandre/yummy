@@ -1,16 +1,16 @@
 #!/bin/bash
 
+# meta/site
+
 # Create site.json
 
-# Usage: site config.json pages.json version  > site.json
+# Usage: site config.json version > site.json
 
-VERSION=$1
-CONFIG=$2
-PAGES=$3
+CONFIG=$1
+VERSION=$2
 
 jq  --sort-keys				\
     --from-file ${0}.jq     \
-    --slurpfile pages "$PAGES"	\
     --arg version $VERSION  \
     "$CONFIG"
 

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# meta/page
+
+set -x
+
+# Merge page front-matter with defaults and etc.
+
+# Usage: page config.json 'source' 'stem' 'target'
+
+CONFIG=$1
+SOURCE=$2
+STEM=$3
+TARGET=$4
+
+FRONT_MATTER='-'    # standard input
+
+prefix=${STEM%.json}
+ID=${prefix#./}
+LASTMOD=$(date --utc --iso-8601=seconds --reference=$SOURCE)
+
+jq  --sort-keys			            \
+    --slurpfile config $CONFIG      \
+    --from-file ${0}.jq             \
+    --arg id $ID                    \
+    --arg filename $filename        \
+    --arg base $base                \
+    --arg lastmod $LASTMOD          \
+    --arg path $path                \
+    --arg section $section          \
+    $FRONT_MATTER
+
+exit
+
+#define _base
+#$(patsubst ../../%,%,$(subst $(_space),,$(patsubst %,../,$(subst /, ,$1))))
+#endef
+
+#	{ echo 'id: "$(subst ./,,$(basename $*))"';			\
+#	  echo 'filename: "$(notdir $*)"';				\
+#	  echo 'section: "$(subst .,,$(patsubst %/,%,$(dir $*)))"';	\
+#	  echo 'path: "$(subst ./,,$(dir $*))"';			\
+#	  echo 'base: "$(call _base,$<)"';				\
+
+# vim:ts=4:sw=4:ai:et:syntax=sh

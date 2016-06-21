@@ -1,17 +1,18 @@
-# Merge page/node JSON with defaults defined in config.yaml
+# meta/node.jq
 
-{
-    id: $id,
-    isnode: true,
-    ispage: false,
-    ishome: false,
-    title: $title,
-    date: $date
-}                   as $node     |
-$config[0].defaults as $defaults |
+# Create node object and merge with defaults
+
+. as $config |
+{ id:     $id,
+  isnode: true,
+  ispage: false,
+  ishome: false,
+  title:  $title,
+  date:   (now | todateiso8601)
+} as $node |
 
 # merge defaults with node
-reduce $defaults[] as $d
+reduce $config.defaults[] as $d
   ({}; if ($id | test("^" + $d.idprefix))
        then . + $d.properties
        else . end) + $node

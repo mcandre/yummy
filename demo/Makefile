@@ -208,7 +208,7 @@ $(Meta):
 
 clobber += $(Meta) # delete all metadata
 
-# TODO: move _meta to /usr/local/share/yummy/meta
+# TODO: move _meta/xxx to /usr/local/share/yummy/meta
 
 #=======================================================================
 # Config
@@ -250,30 +250,12 @@ $(Meta)/dirs.make: $(Meta)/config.json
 
 ifdef PagesJSON # and Documents, NodesJSON
 
-define _base
-$(patsubst ../../%,%,$(subst $(_space),,$(patsubst %,../,$(subst /, ,$1))))
-endef
-
 # $(Meta)/pages/%.json == PagesJSON
 $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 	$(_trace)
-	{ echo 'id: "$(subst ./,,$(basename $*))"';			\
-	  echo 'ispage: true';						\
-	  echo 'isnode: false';						\
-	  echo 'filename: "$(notdir $*)"';				\
-	  echo 'section: "$(subst .,,$(patsubst %/,%,$(dir $*)))"';	\
-	  echo 'path: "$(subst ./,,$(dir $*))"';			\
-	  echo 'url: "$*.html"';					\
-	  echo -n 'lastmod: ';						\
-		date --utc --iso-8601=seconds --reference='$<'		\
-		| sed 's/+0000/+00:00/;s/^/"/;s/$$/"/';			\
-	  echo 'base: "$(call _base,$<)"';				\
-	  $(_yaml_extract) $<; }					\
-	| yaml2json							\
-	| jq --sort-keys						\
-	     --slurpfile config $(Meta)/config.json			\
-	     --from-file $(Share)/merge.jq				\
-	> $@
+	$(_yaml_extract) $<	\
+	| yaml2json		\
+	| _meta/page $(Meta)/config.json $< $* $@ > $@
 
 #=======================================================================
 # JSON for each node
@@ -281,7 +263,7 @@ $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 
 $(NodesJSON): $(Meta)/config.json _meta/node _meta/node.jq | $$(dir $$@)
 	$(_trace)
-	_meta/node $< $@ $(Meta)/nodes/ > $@
+	_meta/node $< $@ > $@
 
 #=======================================================================
 # JSON grouped
@@ -293,9 +275,9 @@ $(Meta)/pages.json: $(PagesJSON) _meta/pages _meta/pages.jq
 	_meta/pages $(filter %.json,$^) > $@
 
 # "site:" top level object
-$(Meta)/site.json: $(Meta)/config.json $(Meta)/pages.json _meta/site _meta/site.jq
+$(Meta)/site.json: $(Meta)/config.json _meta/site _meta/site.jq
 	$(_trace)
-	_meta/site $(Version) $(Meta)/config.json $(Meta)/pages.json > $@
+	_meta/site $< $(Version) > $@
 
 #=======================================================================
 # Derived YAML
@@ -379,6 +361,10 @@ _data := $(wildcard $(Data)/*.yaml)
 #=======================================================================
 # Single page
 #=======================================================================
+
+define _base
+$(patsubst ../../%,%,$(subst $(_space),,$(patsubst %,../,$(subst /, ,$1))))
+endef
 
 _page = $(Layouts)/page.html $(Meta)/pages/%.yaml $(Meta)/site.yaml
 
@@ -487,9 +473,8 @@ $(Documents)/%.md:
 	if test ! -f $@; then				\
 	    $(call _mkdir,$(dir $@));			\
 	    $(_trace);					\
-	    sed "s/@DATE@/$$(date --utc --iso-8601)/"	\
-	        $(Share)/document.md			\
-	    > $@;					\
+	    d=$$(date --utc --iso-8601=seconds);	\
+	    sed "s/@DATE@/$$d/" $(Share)/document.md > $@;\
 	fi
 
 #=======================================================================

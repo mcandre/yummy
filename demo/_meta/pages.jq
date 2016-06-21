@@ -1,6 +1,13 @@
-# Create pages.json
-#   all JSON pages as JSON input
+# meta/pages.jq
 
-{ pages: . }
+# Input is an array of slurped JSON pages
 
-# vim:ai:sw=4:ts=4:et:fileencoding=utf-8:syntax=jq
+. as $pages |
+
+{
+  pages: $pages,
+  sections: ([$pages[].section] | unique)
+}
+
+
+# vim:ai:sw=2:ts=2:et:fileencoding=utf-8:syntax=jq
