@@ -113,7 +113,7 @@ endef
 ########################################################################
 
 # Metadata repository
-Meta := .yummy
+Meta := ./.yummy
 
 -include $(Meta)/dirs.make
 
@@ -255,7 +255,7 @@ $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 	$(_trace)
 	$(_yaml_extract) $<	\
 	| yaml2json		\
-	| _meta/page $(Meta)/config.json $< $* $@ > $@
+	| _meta/page $(Meta)/config.json $< $@ > $@
 
 #=======================================================================
 # JSON for each node

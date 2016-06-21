@@ -2,44 +2,33 @@
 
 # meta/page
 
-set -x
-
 # Merge page front-matter with defaults and etc.
 
 # Usage: page config.json 'source' 'stem' 'target'
 
 CONFIG=$1
 SOURCE=$2
-STEM=$3
-TARGET=$4
+TARGET=$3
 
-FRONT_MATTER='-'    # standard input
-
-prefix=${STEM%.json}
-ID=${prefix#./}
-LASTMOD=$(date --utc --iso-8601=seconds --reference=$SOURCE)
+front_matter='-'    # standard input
+lastmod=$(date --utc --iso-8601=seconds --reference=$SOURCE)
+id=${TARGET%.json}; id=${id#*/pages/}
+filename=${id##*/}
+path=${id%$filename}
+section=${path%%/*}
+base=$(sed 's/[^/]\+/../g;s/\.\.$//' <<<"$id")
 
 jq  --sort-keys			            \
     --slurpfile config $CONFIG      \
     --from-file ${0}.jq             \
-    --arg id $ID                    \
+    --arg id $id                    \
     --arg filename $filename        \
-    --arg base $base                \
-    --arg lastmod $LASTMOD          \
-    --arg path $path                \
-    --arg section $section          \
-    $FRONT_MATTER
+    --arg base "$base"              \
+    --arg lastmod $lastmod          \
+    --arg path "$path"              \
+    --arg section "$section"        \
+    $front_matter
 
 exit
-
-#define _base
-#$(patsubst ../../%,%,$(subst $(_space),,$(patsubst %,../,$(subst /, ,$1))))
-#endef
-
-#	{ echo 'id: "$(subst ./,,$(basename $*))"';			\
-#	  echo 'filename: "$(notdir $*)"';				\
-#	  echo 'section: "$(subst .,,$(patsubst %/,%,$(dir $*)))"';	\
-#	  echo 'path: "$(subst ./,,$(dir $*))"';			\
-#	  echo 'base: "$(call _base,$<)"';				\
 
 # vim:ts=4:sw=4:ai:et:syntax=sh

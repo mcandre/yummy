@@ -13,10 +13,10 @@ prefix=${TARGET%.json}
 TITLE=${prefix##*/}
 ID=${prefix#*/nodes/}/index
 
-jq  --sort-keys			                    \
-    --from-file ${0}.jq                     \
-    --arg id $ID                            \
-    --arg title $TITLE
+jq  --sort-keys			        \
+    --from-file ${0}.jq         \
+    --arg id $ID                \
+    --arg title $TITLE          \
     $CONFIG
 
 exit

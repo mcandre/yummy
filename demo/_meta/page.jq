@@ -13,8 +13,8 @@ $front_matter + {
   lastmod:  $lastmod,
   path:     $path,
   section:  $section,
-  url:      ($stem + ".html")
-}                  as $page     |
+  url:      ($id + ".html")
+}                   as $page     |
 $config[0].defaults as $defaults |
 
 # merge defaults with page

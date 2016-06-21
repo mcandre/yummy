@@ -1,7 +1,7 @@
 ---
 title: Target all
 description: Target `all`.
-date: "2016-06-17"
+date: "2016-06-21T11:21:37Z"
 ---
 
 ## `all`
@@ -10,7 +10,7 @@ Usage: `make [all]`
 
 Other: [Index](index.html)
 
-y4_include({{author.md}})
+m4_include({{author.md}})
 
 Macro: y4_get(AUTHOR)
 
