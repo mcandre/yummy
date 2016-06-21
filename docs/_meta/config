@@ -6,10 +6,9 @@
 
 # Usage: config config.yaml > config.json
 
-CONFIG=${1?Expected config.yaml}
+CONFIG='-'
 
-yaml2json $CONFIG \
-| jq --sort-keys --from-file ${0}.jq
+jq --sort-keys --from-file ${0}.jq $CONFIG
 
 exit
 

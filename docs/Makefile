@@ -219,19 +219,24 @@ ifeq (config.yaml, $(wildcard config.yaml))
     # conversion of config.yaml to $(Meta)/config.json
 $(Meta)/config.json: config.yaml _meta/config _meta/config.jq | $(Meta)
 	$(_trace)
-	_meta/config $< > $@
+	yaml2json $< | _meta/config > $@
 else
 # ...or config.json...
 ifeq (config.json, $(wildcard config.json))
     # copy (formated) of config.json to $(Meta)/config.json
 $(Meta)/config.json: config.json | $(Meta)
 	$(_trace)
-	jq --sort-keys '.' $< > $@
+	_meta/config < $< > $@
 else
 # ...or die!
 $(error Configuration file not found)
 endif
 endif
+
+# "site:" top level object
+$(Meta)/site.json: $(Meta)/config.json _meta/site _meta/site.jq
+	$(_trace)
+	_meta/site $< $(Version) > $@
 
 #=======================================================================
 # Makefiles
@@ -245,39 +250,30 @@ $(Meta)/dirs.make: $(Meta)/config.json
 	$< > $@
 
 #=======================================================================
-# JSON for each page
+# JSON for each page and node
 #=======================================================================
 
-ifdef PagesJSON # and Documents, NodesJSON
+ifdef PagesJSON # and Documents
 
-# $(Meta)/pages/%.json == PagesJSON
 $(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
 	$(_trace)
 	$(_yaml_extract) $<	\
 	| yaml2json		\
 	| _meta/page $(Meta)/config.json $< $@ > $@
 
-#=======================================================================
-# JSON for each node
-#=======================================================================
-
-$(NodesJSON): $(Meta)/config.json _meta/node _meta/node.jq | $$(dir $$@)
+$(Meta)/nodes/%.json: $(Meta)/config.json _meta/node _meta/node.jq | $$(dir $$@)
 	$(_trace)
 	_meta/node $< $@ > $@
 
-#=======================================================================
-# JSON grouped
-#=======================================================================
-
-# "pages:" top level object
 $(Meta)/pages.json: $(PagesJSON) _meta/pages _meta/pages.jq
 	$(_trace)
 	_meta/pages $(filter %.json,$^) > $@
 
-# "site:" top level object
-$(Meta)/site.json: $(Meta)/config.json _meta/site _meta/site.jq
+$(Meta)/nodes.json: $(NodesJSON) _meta/nodes _meta/nodes.jq
 	$(_trace)
-	_meta/site $< $(Version) > $@
+	_meta/nodes $(filter %.json,$^) > $@
+
+# TODO: concat all nodes?
 
 #=======================================================================
 # Derived YAML
@@ -513,6 +509,7 @@ build: clean all
 
 SETUP := \
 	$(Layouts)/page.html	\
+	$(Meta)/nodes.yaml	\
 	$(Meta)/pages.yaml	\
 	$(Meta)/site.yaml	\
 	$(NodesYAML)		\

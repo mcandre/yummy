@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# meta/nodes
+
+# Concat all individual JSON nodes as a list
+
+# Usage: nodes {node.json...} > nodes
+
+jq  --sort-keys         \
+    --slurp             \
+    --from-file ${0}.jq \
+    "$@"
+
+exit
+
+# TODO: use xargs or equivalent?
+
+# vim:ts=4:sw=4:ai:et:syntax=sh
