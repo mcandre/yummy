@@ -1,4 +1,4 @@
-# meta/page.jq
+# meta/entryP.jq
 
 # Create page object and merge with defaults
 

@@ -257,15 +257,15 @@ $(Meta)/dirs.make: $(Meta)/config.json
 
 ifdef PagesJSON # and Documents
 
-$(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json | $$(dir $$@)
+$(Meta)/pages/%.json: $(Documents)/%.md $(Meta)/config.json _meta/entryP _meta/entryP.jq | $$(dir $$@)
 	$(_trace)
 	$(_yaml_extract) $<	\
 	| yaml2json		\
-	| _meta/page $(Meta)/config.json $< $@ > $@
+	| _meta/entryP $(Meta)/config.json $< $@ > $@
 
-$(Meta)/nodes/%.json: $(Meta)/config.json _meta/node _meta/node.jq | $$(dir $$@)
+$(Meta)/nodes/%.json: $(Meta)/config.json _meta/entryN _meta/entryN.jq | $$(dir $$@)
 	$(_trace)
-	_meta/node $< $@ > $@
+	_meta/entryN $< $@ > $@
 
 $(Meta)/pages.json: $(PagesJSON) _meta/pages _meta/pages.jq
 	$(_trace)
@@ -495,7 +495,7 @@ $(Documents)/%.md:
 	    $(call _mkdir,$(dir $@));			\
 	    $(_trace);					\
 	    d=$$(date --utc --iso-8601=seconds);	\
-	    sed "s/@DATE@/$$d/" $(Share)/document.md > $@;\
+	    sed "s/@DATE@/$$d/" $(Share)/entry.md > $@;\
 	fi
 
 #=======================================================================

@@ -1,4 +1,4 @@
-# meta/node.jq
+# meta/entryN.jq
 
 # Create node object and merge with defaults
 

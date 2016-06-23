@@ -1,7 +1,14 @@
 ---
 title: Target all
-description: Target `all`.
-date: "2016-06-21T11:21:37Z"
+subtitle: null
+summary: Target all
+author: Anonymous
+tags:
+- target
+- makefile
+categories: null
+published: "2016-06-23T07:07:59+0000"
+updated: "2016-06-23T07:07:59+0000"
 ---
 
 ## `all`

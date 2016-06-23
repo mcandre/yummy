@@ -9,6 +9,16 @@
 <style type="text/css">code{white-space: pre;}</style>
 
 <!--
+  Subject
+-->
+$if(self.tags)$
+<meta name="keywords" content="$for(self.tags)$$self.tags$, $endfor$"/>
+$endif$
+$if(self.summary)$
+<meta name="description" content="$self.summary$"/>
+$endif$
+
+<!--
   Pandoc option: html-q-tags
 -->
 $if(quotes)$

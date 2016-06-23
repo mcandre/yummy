@@ -5,8 +5,8 @@ summary: Sed nec mauris vel lectus viverra ullamcorper. Maecenas urna dui, lobor
 author: Anonymous
 tags: null
 categories: null
-published: "2016-06-23T06:53:48+0000"
-updated: "2016-06-23T06:53:48+0000"
+published: "@DATE@"
+updated: "@DATE@"
 ---
 
 ## Lorem ipsum dolor sit amet 
